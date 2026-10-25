@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Year Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        .image-container {
+            width: 100%;
+            max-height: 48vh;
+            aspect-ratio: 16 / 9;
+            border-radius: 8px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            cursor: zoom-in;
+            position: relative;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.25s ease;
+        }
+        .image-container:hover img {
+            transform: scale(1.02);
+        }
+        
+        /* Modal Lightbox for Enlarged Image */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            cursor: zoom-out;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal img {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+
+        .slider-container {
+            margin: 25px 0;
+            position: relative;
+        }
+        .year-label {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        input[type=range] {
+            width: 100%;
+            margin: 15px 0;
+            -webkit-appearance: none;
+            background: #cbd5e0;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #3182ce;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            background: #2b6cb0;
+        }
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            color: #718096;
+            font-size: 0.9rem;
+            padding: 0 5px;
+        }
+        button {
+            background-color: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #38a169;
+        }
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: none;
+        }
+        .feedback.correct { background-color: #c6f6d5; color: #22543d; }
+        .feedback.close { background-color: #feebc8; color: #744210; }
+        .feedback.wrong { background-color: #fed7d7; color: #742a2a; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="stats-bar">
+        <div id="score-display">Total Score: 0</div>
+        <div id="round-display">Round: 1/10</div>
+    </div>
+
+    <div class="image-container" id="image-box" onclick="toggleModal(true)">
+        <img id="game-image" src="" alt="Historical Scene">
+    </div>
+
+    <div class="slider-container">
+        <div class="year-label" id="year-val">2000</div>
+        <input type="range" id="year-slider" min="1900" max="2025" value="2000">
+        <div class="scale-labels">
+            <span>1900</span>
+            <span>2000</span>
+            <span>2025</span>
+        </div>
+    </div>
+
+    <button id="action-btn" onclick="submitGuess()">Submit Guess</button>
+    <div id="feedback" class="feedback"></div>
+</div>
+
+<!-- Fullscreen Modal Lightbox -->
+<div class="modal" id="image-modal" onclick="toggleModal(false)">
+    <img id="modal-image" src="" alt="Enlarged Historical Scene">
+</div>
+
+<script>
+    let gameData = [];
+    let currentRound = 0;
+    let totalScore = 0;
+    let isFlipped = false;
+
+    const slider = document.getElementById('year-slider');
+    const yearVal = document.getElementById('year-val');
+    const image = document.getElementById('game-image');
+    const modalImage = document.getElementById('modal-image');
+    const modal = document.getElementById('image-modal');
+    const actionBtn = document.getElementById('action-btn');
+    const feedback = document.getElementById('feedback');
+    const scoreDisplay = document.getElementById('score-display');
+    const roundDisplay = document.getElementById('round-display');
+
+    // Update live year label when dragging slider
+    slider.addEventListener('input', () => {
+        yearVal.innerText = slider.value;
+    });
+
+    // Toggle fullscreen image modal
+    function toggleModal(open) {
+        if (open && image.src) {
+            modalImage.src = image.src;
+            modal.classList.add('active');
+        } else {
+            modal.classList.remove('active');
+        }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') toggleModal(false);
+    });
+
+    // Load data from images.json and start game
+    async function initGame() {
+        try {
+            const response = await fetch('images.json');
+            if (!response.ok) throw new Error("Could not load images.json");
+            const allImages = await response.json();
+
+            // Randomize and select up to 10 images per session
+            gameData = allImages.sort(() => 0.5 - Math.random()).slice(0, 10);
+            
+            if (gameData.length === 0) {
+                alert("No images found in images.json!");
+                return;
+            }
+
+            currentRound = 0;
+            totalScore = 0;
+            scoreDisplay.innerText = `Total Score: 0`;
+            initRound();
+        } catch (error) {
+            console.error(error);
+            feedback.className = "feedback wrong";
+            feedback.innerHTML = `⚠️ Error loading images.json. Please ensure it is in the same directory.`;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function initRound() {
+        isFlipped = false;
+        feedback.style.display = 'none';
+        slider.disabled = false;
+        slider.value = 2000;
+        yearVal.innerText = 2000;
+        
+        roundDisplay.innerText = `Round: ${currentRound + 1}/${gameData.length}`;
+        image.src = gameData[currentRound].url;
+        actionBtn.innerText = "Submit Guess";
+        actionBtn.style.backgroundColor = "#48bb78";
+    }
+
+    function submitGuess() {
+        if (isFlipped) {
+            currentRound++;
+            if (currentRound < gameData.length) {
+                initRound();
+            } else {
+                // Game Over Screen
+                document.querySelector('.image-container').style.display = 'none';
+                document.querySelector('.slider-container').style.display = 'none';
+                roundDisplay.style.display = 'none';
+                feedback.className = "feedback correct";
+                feedback.style.display = "block";
+                feedback.innerHTML = `🎉 Magnificent! Final Score: ${totalScore} / ${gameData.length * 100}`;
+                actionBtn.innerText = "Play Again";
+                actionBtn.style.backgroundColor = "#3182ce";
+                actionBtn.setAttribute('onclick', 'initGame()');
+            }
+            return;
+        }
+
+        const guess = parseInt(slider.value);
+        const actual = gameData[currentRound].year;
+        const difference = Math.abs(guess - actual);
+        let roundScore = 0;
+
+        slider.disabled = true;
+        isFlipped = true;
+
+        if (difference === 0) {
+            roundScore = 100;
+            feedback.className = "feedback correct";
+            feedback.innerHTML = `🌟 Spot On! It was exactly ${actual}. (+100 pts)`;
+        } else if (difference <= 3) {
+            roundScore = 100 - (difference * 25);
+            feedback.className = "feedback close";
+            feedback.innerHTML = `🎯 So close! It was ${actual} (You guessed ${guess}). (+${roundScore} pts)`;
+        } else {
+            roundScore = 0;
+            feedback.className = "feedback wrong";
+            feedback.innerHTML = `❌ Missed it! It was ${actual} (You guessed ${guess}). (+0 pts)`;
+        }
+
+        totalScore += roundScore;
+        scoreDisplay.innerText = `Total Score: ${totalScore}`;
+        feedback.style.display = 'block';
+        
+        actionBtn.innerText = "Next Round";
+        actionBtn.style.backgroundColor = "#3182ce";
+    }
+
+    // Initialize game on page load
+    initGame();
+</script>
+
+</body>
+</html>
