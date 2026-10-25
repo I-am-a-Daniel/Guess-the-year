@@ -1,5 +1,19 @@
 [
   { "url": "img/photo1.jpg", "year": 1995 },
-    { "url": "img/photo2.jpg", "year": 1995 }
-
+    { "url": "img/photo2.jpg", "year": 1995 },
+    { "url": "img/photo3.jpg", "year": 1995 },
+    { "url": "img/photo4.jpg", "year": 1995 },
+    { "url": "img/photo5.jpg", "year": 1995 },
+    { "url": "img/photo6.jpg", "year": 1995 },
+    { "url": "img/photo7.jpg", "year": 1995 },
+    { "url": "img/photo8.jpg", "year": 1995 },
+    { "url": "img/photo9.jpg", "year": 1995 },
+    { "url": "img/photo10.jpg", "year": 1995 },
+    { "url": "img/photo11.jpg", "year": 1995 },
+    { "url": "img/photo12.jpg", "year": 1992 },
+    { "url": "img/photo13.jpg", "year": 1992 },
+    { "url": "img/photo14.jpg", "year": 1992 },
+    { "url": "img/photo15.jpg", "year": 1992 },
+    { "url": "img/photo16.jpg", "year": 1992 },
+    { "url": "img/photo17.jpg", "year": 1992 }
 ]
