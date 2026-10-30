@@ -30,6 +30,7 @@
             margin-bottom: 20px;
             font-weight: bold;
             color: #4a5568;
+            font-size: 1rem;
         }
         .image-container {
             width: 100%;
@@ -155,8 +156,8 @@
 
 <div class="game-container">
     <div class="stats-bar">
-        <div id="score-display">Total Score: 0</div>
-        <div id="round-display">Round: 1/10</div>
+        <div id="score-display">Összpontszám: 0</div>
+        <div id="round-display">Forduló: 1/10</div>
     </div>
 
     <div class="image-container" id="image-box" onclick="toggleModal(true)">
@@ -165,15 +166,15 @@
 
     <div class="slider-container">
         <div class="year-label" id="year-val">2000</div>
-        <input type="range" id="year-slider" min="1975" max="2025" value="2000">
+        <input type="range" id="year-slider" min="1985" max="2025" value="2000">
         <div class="scale-labels">
-            <span>1975</span>
+            <span>1985</span>
             <span>2000</span>
             <span>2025</span>
         </div>
     </div>
 
-    <button id="action-btn" onclick="submitGuess()">Submit Guess</button>
+    <button id="action-btn" onclick="submitGuess()">Tippelek</button>
     <div id="feedback" class="feedback"></div>
 </div>
 
@@ -183,6 +184,7 @@
 </div>
 
 <script>
+    let masterImageList = [];
     let gameData = [];
     let currentRound = 0;
     let totalScore = 0;
@@ -197,6 +199,8 @@
     const feedback = document.getElementById('feedback');
     const scoreDisplay = document.getElementById('score-display');
     const roundDisplay = document.getElementById('round-display');
+    const imageContainer = document.querySelector('.image-container');
+    const sliderContainer = document.querySelector('.slider-container');
 
     // Update live year label when dragging slider
     slider.addEventListener('input', () => {
@@ -218,31 +222,41 @@
         if (e.key === 'Escape') toggleModal(false);
     });
 
-    // Load data from images.json and start game
+    // Load data from images.json once on page startup
     async function initGame() {
         try {
             const response = await fetch('images.json');
             if (!response.ok) throw new Error("Could not load images.json");
-            const allImages = await response.json();
-
-            // Randomize and select up to 10 images per session
-            gameData = allImages.sort(() => 0.5 - Math.random()).slice(0, 10);
+            masterImageList = await response.json();
             
-            if (gameData.length === 0) {
+            if (masterImageList.length === 0) {
                 alert("No images found in images.json!");
                 return;
             }
 
-            currentRound = 0;
-            totalScore = 0;
-            scoreDisplay.innerText = `Total Score: 0`;
-            initRound();
+            startNewSession();
         } catch (error) {
             console.error(error);
             feedback.className = "feedback wrong";
-            feedback.innerHTML = `⚠️ Error loading images.json. Please ensure it is in the same directory.`;
+            feedback.innerHTML = `⚠️ Error loading images.json. Please ensure it is hosted or served via local server.`;
             feedback.style.display = 'block';
         }
+    }
+
+    // Set up a new 10-image playthrough set
+    function startNewSession() {
+        // Shuffle master list and pick up to 10 images
+        gameData = [...masterImageList].sort(() => 0.5 - Math.random()).slice(0, 10);
+        currentRound = 0;
+        totalScore = 0;
+        
+        // Restore layout elements when restarting after Game Over screen
+        imageContainer.style.display = 'flex';
+        sliderContainer.style.display = 'block';
+        roundDisplay.style.display = 'block';
+
+        scoreDisplay.innerText = `Összpontszám: ${totalScore}`;
+        initRound();
     }
 
     function initRound() {
@@ -252,10 +266,11 @@
         slider.value = 2000;
         yearVal.innerText = 2000;
         
-        roundDisplay.innerText = `Round: ${currentRound + 1}/${gameData.length}`;
+        roundDisplay.innerText = `Forduló: ${currentRound + 1}/${gameData.length}`;
         image.src = gameData[currentRound].url;
-        actionBtn.innerText = "Submit Guess";
+        actionBtn.innerText = "Tippelek";
         actionBtn.style.backgroundColor = "#48bb78";
+        actionBtn.setAttribute('onclick', 'submitGuess()');
     }
 
     function submitGuess() {
@@ -265,15 +280,17 @@
                 initRound();
             } else {
                 // Game Over Screen
-                document.querySelector('.image-container').style.display = 'none';
-                document.querySelector('.slider-container').style.display = 'none';
+                imageContainer.style.display = 'none';
+                sliderContainer.style.display = 'none';
                 roundDisplay.style.display = 'none';
+                
                 feedback.className = "feedback correct";
                 feedback.style.display = "block";
-                feedback.innerHTML = `🎉 Magnificent! Final Score: ${totalScore} / ${gameData.length * 100}`;
-                actionBtn.innerText = "Play Again";
+                feedback.innerHTML = `🎉 Szép munka! Végső pontszám: ${totalScore} / ${gameData.length * 100}`;
+                
+                actionBtn.innerText = "Új játék";
                 actionBtn.style.backgroundColor = "#3182ce";
-                actionBtn.setAttribute('onclick', 'initGame()');
+                actionBtn.setAttribute('onclick', 'startNewSession()');
             }
             return;
         }
@@ -289,22 +306,22 @@
         if (difference === 0) {
             roundScore = 100;
             feedback.className = "feedback correct";
-            feedback.innerHTML = `🌟 Spot On! It was exactly ${actual}. (+100 pts)`;
+            feedback.innerHTML = `🌟 Szép munka! A helyes évszám ${actual}. (+100 pont)`;
         } else if (difference <= 3) {
             roundScore = 100 - (difference * 25);
             feedback.className = "feedback close";
-            feedback.innerHTML = `🎯 So close! It was ${actual} (You guessed ${guess}). (+${roundScore} pts)`;
+            feedback.innerHTML = `🎯 Közel volt! Valójában ${actual} (te pedig ${guess}-t tippeltél). (+${roundScore} pont)`;
         } else {
             roundScore = 0;
             feedback.className = "feedback wrong";
-            feedback.innerHTML = `❌ Missed it! It was ${actual} (You guessed ${guess}). (+0 pts)`;
+            feedback.innerHTML = `❌ Nem sikerült! Valójában ${actual} (te viszont ${guess}-t tippeltél). (+0 pont)`;
         }
 
         totalScore += roundScore;
-        scoreDisplay.innerText = `Total Score: ${totalScore}`;
+        scoreDisplay.innerText = `Összpontszám: ${totalScore}`;
         feedback.style.display = 'block';
         
-        actionBtn.innerText = "Next Round";
+        actionBtn.innerText = "Következő kör";
         actionBtn.style.backgroundColor = "#3182ce";
     }
 
