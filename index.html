@@ -7,7 +7,8 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
+            background-color: #0f172a;
+            color: #f8fafc;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -16,9 +17,9 @@
             min-height: 100vh;
         }
         .game-container {
-            background-color: white;
+            background-color: #1e293b;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
             padding: 30px;
             max-width: 600px;
             width: 100%;
@@ -29,7 +30,7 @@
             justify-content: space-between;
             margin-bottom: 20px;
             font-weight: bold;
-            color: #4a5568;
+            color: #cbd5e1;
             font-size: 1rem;
         }
         .image-container {
@@ -37,13 +38,13 @@
             max-height: 48vh;
             aspect-ratio: 16 / 9;
             border-radius: 8px;
-            background-color: #e2e8f0;
+            background-color: #0f172a;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 25px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
             cursor: zoom-in;
             position: relative;
         }
@@ -66,7 +67,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
+            background-color: rgba(0, 0, 0, 0.9);
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -84,7 +85,7 @@
             max-height: 90vh;
             object-fit: contain;
             border-radius: 6px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
         }
 
         .slider-container {
@@ -94,14 +95,14 @@
         .year-label {
             font-size: 2rem;
             font-weight: bold;
-            color: #2d3748;
+            color: #f8fafc;
             margin-bottom: 10px;
         }
         input[type=range] {
             width: 100%;
             margin: 15px 0;
             -webkit-appearance: none;
-            background: #cbd5e0;
+            background: #334155;
             height: 8px;
             border-radius: 4px;
             outline: none;
@@ -111,22 +112,22 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: #3182ce;
+            background: #38bdf8;
             cursor: pointer;
             transition: background 0.15s;
         }
         input[type=range]::-webkit-slider-thumb:hover {
-            background: #2b6cb0;
+            background: #0ea5e9;
         }
         .scale-labels {
             display: flex;
             justify-content: space-between;
-            color: #718096;
+            color: #94a3b8;
             font-size: 0.9rem;
             padding: 0 5px;
         }
         button {
-            background-color: #48bb78;
+            background-color: #059669;
             color: white;
             border: none;
             padding: 12px 30px;
@@ -138,7 +139,7 @@
             width: 100%;
         }
         button:hover {
-            background-color: #38a169;
+            background-color: #047857;
         }
         .feedback {
             margin-top: 20px;
@@ -147,9 +148,9 @@
             font-weight: bold;
             display: none;
         }
-        .feedback.correct { background-color: #c6f6d5; color: #22543d; }
-        .feedback.close { background-color: #feebc8; color: #744210; }
-        .feedback.wrong { background-color: #fed7d7; color: #742a2a; }
+        .feedback.correct { background-color: #064e3b; color: #a7f3d0; }
+        .feedback.close { background-color: #78350f; color: #fde68a; }
+        .feedback.wrong { background-color: #7f1d1d; color: #fecaca; }
     </style>
 </head>
 <body>
@@ -269,7 +270,7 @@
         roundDisplay.innerText = `Forduló: ${currentRound + 1}/${gameData.length}`;
         image.src = gameData[currentRound].url;
         actionBtn.innerText = "Tippelek";
-        actionBtn.style.backgroundColor = "#48bb78";
+        actionBtn.style.backgroundColor = "#059669";
         actionBtn.setAttribute('onclick', 'submitGuess()');
     }
 
@@ -289,7 +290,7 @@
                 feedback.innerHTML = `🎉 A játék véget ért! Pontszámod: ${totalScore} / ${gameData.length * 100}`;
                 
                 actionBtn.innerText = "Új játék";
-                actionBtn.style.backgroundColor = "#3182ce";
+                actionBtn.style.backgroundColor = "#2563eb";
                 actionBtn.setAttribute('onclick', 'startNewSession()');
             }
             return;
@@ -322,7 +323,7 @@
         feedback.style.display = 'block';
         
         actionBtn.innerText = "Következő kör";
-        actionBtn.style.backgroundColor = "#3182ce";
+        actionBtn.style.backgroundColor = "#2563eb";
     }
 
     // Initialize game on page load
