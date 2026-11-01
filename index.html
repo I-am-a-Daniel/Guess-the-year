@@ -169,9 +169,9 @@
 
     <div class="slider-container">
         <div class="year-label" id="year-val">2000</div>
-        <input type="range" id="year-slider" min="1990" max="2025" value="2000">
+        <input type="range" id="year-slider" min="1985" max="2025" value="2000">
         <div class="scale-labels">
-            <span>1990</span>
+            <span>1985</span>
             <span>2000</span>
             <span>2025</span>
         </div>
@@ -313,11 +313,11 @@
         } else if (difference <= 3) {
             roundScore = 100 - (difference * 25);
             feedback.className = "feedback close";
-            feedback.innerHTML = `🎯 Közel volt! Valójában ${actual} (te pedig ${guess}-t tippeltél). (+${roundScore} pont)`;
+            feedback.innerHTML = `🎯 Közel volt! A helyes válasz ${actual} (a te tipped: ${guess}). (+${roundScore} pont)`;
         } else {
             roundScore = 0;
             feedback.className = "feedback wrong";
-            feedback.innerHTML = `❌ Nem sikerült! Valójában ${actual} (te viszont ${guess}-t tippeltél). (+0 pont)`;
+            feedback.innerHTML = `❌ Nem sikerült! A helyes válasz ${actual} (a te tipped: ${guess}). (+0 pont)`;
         }
 
         totalScore += roundScore;
